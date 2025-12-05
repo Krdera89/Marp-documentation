@@ -31,11 +31,14 @@ strong {
 </style>
 
 # Student Course Management System
-## REST API - HW4 Part 2
+
+## REST API - Laravel Migration
 
 **Kevin Deras**  
+
 **CSC 640**  
-**November 6, 2025**
+
+**December 2025**
 
 ---
 
@@ -44,38 +47,44 @@ strong {
 A REST API for managing students, courses, and enrollments
 
 **Tech Stack:**
-- NGINX / PHP Built-in Server
 
-- PHP 8+ with MySQL Database
+- Laravel 10 Framework
 
-- PDO for secure database access
+- PHP 8.1+ with MySQL Database
 
-- Bearer Token authentication
+- Eloquent ORM for database access
+
+- Laravel Sanctum token authentication
+
 - JSON format
+
+- Docker/Sail for deployment
 
 - Postman for testing
 
-**Goal:** 11 API endpoints with 5 secured + Database Integration
+**Goal:** 12 API endpoints with secure authentication + Laravel migration
 
 ---
 
 ## Objectives
 
-- Build a REST API following best practices
+- Migrate from vanilla PHP to Laravel framework
 
-- Integrate MySQL database with proper schema
+- Replace PDO with Eloquent ORM
 
-- Add secure authentication
+- Implement Laravel Sanctum for authentication
 
-- Follow RESTful design principles
+- Use Laravel migrations for database schema
 
-- Keep code clean and maintainable
+- Leverage Laravel's built-in validation
+
+- Follow Laravel MVC conventions
 
 - Document everything
 
 - Test all endpoints with Postman
 
-**Result:** Production-ready API with database persistence
+**Result:** Production-ready API with modern PHP framework
 
 ---
 
@@ -84,107 +93,108 @@ A REST API for managing students, courses, and enrollments
 ```
 Client Request
     ↓
-NGINX/PHP Server
+Laravel Sail (Docker)
     ↓
-index.php (Router)
+Laravel Framework
     ↓
-├── Auth.php (Security)
-
-├── Database.php (MySQL/PDO)
-
-└── Response.php (Output)
-
+├── Routes (api.php)
+├── Middleware (Sanctum Auth)
+├── Controllers
+└── Eloquent Models
+    ↓
+MySQL Database
 ```
 
-**Database Integration:** MySQL with foreign keys and cascade deletes
+**Laravel handles routing, validation, and database automatically**
 
 ---
 
 ## Project Structure
 
 ```
-student-api/
-
-├── public/
-
-│   └── index.php
-
-├── src/
-
-│   ├── Auth.php
-
-│   ├── Database.php  ← NEW!
-
-│   ├── Mock.php (legacy)
-
-│   └── Response.php
-
-├── vendor/
-
-│   └── autoload.php
-
-└── composer.json
-
+student-api-laravel/
+├── app/
+│   ├── Http/Controllers/
+│   │   ├── StudentController.php
+│   │   ├── CourseController.php
+│   │   ├── EnrollmentController.php
+│   │   └── AuthController.php
+│   └── Models/
+│       ├── Student.php
+│       ├── Course.php
+│       └── Enrollment.php
+├── database/migrations/
+│   ├── create_students_table.php
+│   ├── create_courses_table.php
+│   └── create_enrollments_table.php
+├── routes/api.php
+└── compose.yaml (Docker)
 ```
 
-**Key Change:** Database.php replaces Mock.php for data persistence
+**Key Change:** Laravel MVC structure replaces custom PHP classes
 
 ---
 
 ## API Endpoints Overview
 
 | Resource | Total | Secure |
-
 |----------|-------|--------|
-
 | Health | 1 | 0 |
+| Authentication | 2 | 1 (logout) |
+| Students | 5 | 5 |
+| Courses | 5 | 5 |
+| Enrollments | 3 | 3 |
+| **Total** | **12** | **11** |
 
-| Students | 5 | 1 |
+*All endpoints require authentication except health check and login*
 
-| Courses | 5 | 2 |
+---
 
-| Enrollments | 3 | 2 |
+## Authentication Endpoints
 
-| **Total** | **11** | **5** |
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| POST | /api/login | No | Get authentication token |
+| POST | /api/logout | **Yes** | Invalidate token |
 
-*Secure endpoints require Bearer Token*
+**Login Request:**
+```json
+{
+  "email": "user@example.com",
+  "password": "password"
+}
+```
+
+**Login Response:**
+```json
+{
+  "token": "1|abcdef1234567890..."
+}
+```
 
 ---
 
 ## Student Endpoints
 
 | Method | Endpoint | Auth | Description |
-
 |--------|----------|------|-------------|
-
-| GET | /students | No | Get all students |
-
-| GET | /students/{id} | No | Get specific student |
-
-| POST | /students | No | Create student |
-
-| PUT | /students/{id} | No | Update student |
-
-| DELETE | /students/{id} | **Yes** | Delete student |
+| GET | /api/students | **Yes** | Get all students |
+| GET | /api/students/{id} | **Yes** | Get specific student |
+| POST | /api/students | **Yes** | Create student |
+| PUT | /api/students/{id} | **Yes** | Update student |
+| DELETE | /api/students/{id} | **Yes** | Delete student |
 
 ---
 
 **Example Response:**
-
 ```json
-
 {
-
   "id": 1,
-
   "name": "Kevin",
-
   "email": "kevin@example.com",
-
-  "created_at": "2025-11-06 10:30:00"
-
+  "created_at": "2025-12-03T10:30:00.000000Z",
+  "updated_at": "2025-12-03T10:30:00.000000Z"
 }
-
 ```
 
 ---
@@ -192,37 +202,24 @@ student-api/
 ## Course Endpoints
 
 | Method | Endpoint | Auth | Description |
-
 |--------|----------|------|-------------|
-
-| GET | /courses | No | Get all courses |
-
-| GET | /courses/{id} | No | Get specific course |
-
-| POST | /courses | **Yes** | Create course |
-
-| PUT | /courses/{id} | No | Update course |
-
-| DELETE | /courses/{id} | **Yes** | Delete course |
+| GET | /api/courses | **Yes** | Get all courses |
+| GET | /api/courses/{id} | **Yes** | Get specific course |
+| POST | /api/courses | **Yes** | Create course |
+| PUT | /api/courses/{id} | **Yes** | Update course |
+| DELETE | /api/courses/{id} | **Yes** | Delete course |
 
 ---
 
 **Example Response:**
-
 ```json
-
 {
-
   "id": 1,
-
   "code": "CSC640",
-
   "title": "Software Engineering",
-
-  "created_at": "2025-11-06 10:30:00"
-
+  "created_at": "2025-12-04T10:30:00.000000Z",
+  "updated_at": "2025-12-04T10:30:00.000000Z"
 }
-
 ```
 
 ---
@@ -230,53 +227,56 @@ student-api/
 ## Enrollment Endpoints
 
 | Method | Endpoint | Auth | Description |
-
 |--------|----------|------|-------------|
-
-| GET | /enrollments | No | Get all enrollments |
-
-| POST | /enrollments | **Yes** | Enroll student |
-
-| DELETE | /enrollments/{id} | **Yes** | Unenroll student |
+| GET | /api/enrollments | **Yes** | Get all enrollments |
+| POST | /api/enrollments | **Yes** | Enroll student |
+| DELETE | /api/enrollments/{id} | **Yes** | Unenroll student |
 
 ---
 
 **Create Enrollment:**
-
 ```json
-
 {
-
   "student_id": 1,
-
   "course_id": 1
-
 }
-
 ```
 
-**Validates:** Both student and course must exist
+**Response (with relationships):**
+```json
+{
+  "id": 1,
+  "student_id": 1,
+  "course_id": 1,
+  "student": {
+    "id": 1,
+    "name": "Kevin",
+    "email": "kevin@example.com"
+  },
+  "course": {
+    "id": 1,
+    "code": "CSC640",
+    "title": "Software Engineering"
+  }
+}
+```
+
+**Eloquent automatically includes related data!**
 
 ---
 
 ## Health Check Endpoint
 
-**GET /status**
+**GET /api/status**
 
 Returns API health and version:
 
 ```json
-
 {
-
   "ok": true,
-
   "php": "8.1.0",
-
-  "database": "MySQL"
-
+  "database": "MySQL (Laravel Eloquent)"
 }
-
 ```
 
 Useful for monitoring and testing
@@ -285,342 +285,307 @@ Useful for monitoring and testing
 
 ## Security Implementation
 
-**Bearer Token Authentication**
+**Laravel Sanctum Token Authentication**
 
-5 Protected Endpoints:
+11 Protected Endpoints (all except health check and login)
 
-1. DELETE /students/{id}
+**How it works:**
 
-2. POST /courses
-
-3. DELETE /courses/{id}
-
-4. POST /enrollments
-
-5. DELETE /enrollments/{id}
-
-**Header:**
+1. POST `/api/login` with email/password
+2. Receive token in response
+3. Include token in all subsequent requests:
 
 ```
-
-Authorization: Bearer super-secret-123
-
+Authorization: Bearer 1|abcdef1234567890...
 ```
----
 
-*Token is hardcoded for now. Will use environment variables or JWT for production.*
+**Benefits:**
+- Tokens stored in database
+- Can be revoked (logout)
+- User-based authentication
+- More secure than hardcoded tokens
 
 ---
 
-## Auth.php Implementation
+## AuthController Implementation
 
 ```php
-
 <?php
 
-namespace App;
+namespace App\Http\Controllers;
 
-class Auth {
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 
-    private const TOKEN = 'super-secret-123';
-
-    
-
-    public static function requireBearer(): void {
-
-        $hdr = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
-
+class AuthController extends Controller
+{
+    public function login(Request $request)
+    {
+        $user = User::where('email', $request->email)->first();
         
-
-        if (!preg_match('/^Bearer\s+(.+)$/i', $hdr, $m) 
-
-            || $m[1] !== self::TOKEN) {
-
-            Response::json(['error' => 'Unauthorized'], 401);
-
+        if (!$user || !Hash::check($request->password, $user->password)) {
+            return response()->json(['message' => 'Invalid credentials'], 401);
         }
-
+        
+        $token = $user->createToken('api-token')->plainTextToken;
+        return response()->json(['token' => $token]);
     }
-
 }
-
 ```
 
-Checks for Bearer token and validates it
+Laravel Sanctum handles token creation and validation automatically
 
 ---
 
-## Response.php
+## StudentController Example
 
 ```php
-
 <?php
 
-namespace App;
+namespace App\Http\Controllers;
 
-class Response {
+use App\Models\Student;
 
-    public static function json($data, int $code = 200): void {
-
-        http_response_code($code);
-
-        header('Content-Type: application/json');
-
-        header('Access-Control-Allow-Origin: *');
-
-        header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
-
-        header('Access-Control-Allow-Headers: Content-Type, Authorization');
-
-        echo json_encode($data, JSON_PRETTY_PRINT);
-
-        exit;
-
+class StudentController extends Controller
+{
+    public function index()
+    {
+        return response()->json(Student::all());
     }
-
+    
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'name'  => 'required|string',
+            'email' => 'required|email|unique:students,email',
+        ]);
+        
+        $student = Student::create($data);
+        return response()->json($student, 201);
+    }
 }
-
 ```
 
-Standardizes all responses with proper headers and CORS
+**Much cleaner than vanilla PHP!**
 
 ---
 
-## Database.php - The Heart of Part 2
+## Eloquent Models
 
 ```php
-
 <?php
 
-namespace App;
+namespace App\Models;
 
-use PDO;
+use Illuminate\Database\Eloquent\Model;
 
-class Database {
-
-    private static ?PDO $pdo = null;
-
+class Student extends Model
+{
+    protected $fillable = ['name', 'email'];
     
-
-    public static function connect(): PDO {
-
-        if (self::$pdo === null) {
-
-            self::$pdo = new PDO(
-
-                'mysql:host=localhost;dbname=student_api;charset=utf8mb4',
-
-                'root', '',
-
-                [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
-
-            );
-
-        }
-
-        return self::$pdo;
-
+    public function enrollments()
+    {
+        return $this->hasMany(Enrollment::class);
     }
-
     
-
-    public static function getAllStudents(): array {
-
-        $stmt = self::connect()->query('SELECT * FROM students ORDER BY id');
-
-        return $stmt->fetchAll();
-
+    public function courses()
+    {
+        return $this->belongsToMany(Course::class, 'enrollments');
     }
-
 }
-
 ```
 
-**Key Features:** Singleton pattern, PDO prepared statements, secure by default
+**Key Features:**
+- Automatic timestamps
+- Relationship definitions
+- Mass assignment protection
+- No raw SQL needed!
+
+---
+
+## Database Migrations
+
+```php
+Schema::create('students', function (Blueprint $table) {
+    $table->id();
+    $table->string('name');
+    $table->string('email')->unique();
+    $table->timestamps();
+});
+
+Schema::create('enrollments', function (Blueprint $table) {
+    $table->id();
+    $table->foreignId('student_id')
+          ->constrained()
+          ->cascadeOnDelete();
+    $table->foreignId('course_id')
+          ->constrained()
+          ->cascadeOnDelete();
+    $table->unique(['student_id', 'course_id']);
+    $table->timestamps();
+});
+```
+
+**Benefits:**
+- Version controlled schema
+- Rollback support
+- Database agnostic
+- Foreign keys handled automatically
 
 ---
 
 ## Database Schema
 
-```sql
+**Students Table:**
+- `id` (auto-increment)
+- `name` (string)
+- `email` (string, unique)
+- `created_at`, `updated_at` (timestamps)
 
-CREATE TABLE students (
+**Courses Table:**
+- `id` (auto-increment)
+- `code` (string, unique)
+- `title` (string)
+- `created_at`, `updated_at` (timestamps)
 
-    id INT AUTO_INCREMENT PRIMARY KEY,
+**Enrollments Table:**
+- `id` (auto-increment)
+- `student_id` (foreign key → students)
+- `course_id` (foreign key → courses)
+- `created_at`, `updated_at` (timestamps)
+- Unique constraint on (student_id, course_id)
 
-    name VARCHAR(255) NOT NULL,
-
-    email VARCHAR(255) NOT NULL,
-
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-
-);
-
-CREATE TABLE courses (
-
-    id INT AUTO_INCREMENT PRIMARY KEY,
-
-    code VARCHAR(50) NOT NULL,
-
-    title VARCHAR(255) NOT NULL,
-
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-
-);
-
-CREATE TABLE enrollments (
-
-    id INT AUTO_INCREMENT PRIMARY KEY,
-
-    student_id INT NOT NULL,
-
-    course_id INT NOT NULL,
-
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-    FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE,
-
-    FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE,
-
-    UNIQUE KEY unique_enrollment (student_id, course_id)
-
-);
-
-```
-
-**Foreign Keys:** Ensure referential integrity
+**Foreign Keys:** Ensure referential integrity with cascade deletes
 
 ---
 
 ## Database Relationships
 
-**Foreign Key Constraints:**
+**Eloquent Relationships:**
 
-- `enrollments.student_id` → `students.id` (CASCADE DELETE)
-
-- `enrollments.course_id` → `courses.id` (CASCADE DELETE)
+- `Student` has many `Enrollment` (one-to-many)
+- `Course` has many `Enrollment` (one-to-many)
+- `Student` belongs to many `Course` through `Enrollment` (many-to-many)
+- `Enrollment` belongs to `Student` (many-to-one)
+- `Enrollment` belongs to `Course` (many-to-one)
 
 **Benefits:**
-
+- ✅ Automatic JOINs with `with()`
 - ✅ Can't enroll in non-existent courses
-
 - ✅ Deleting student removes enrollments automatically
-
 - ✅ Prevents duplicate enrollments
 
 ---
 
 ## SQL Injection Prevention
 
-**All queries use PDO prepared statements:**
+**Eloquent ORM uses prepared statements automatically:**
 
 ```php
+// This is safe - Eloquent handles it
+Student::where('email', $email)->first();
 
-// Secure - uses placeholders
-
-$stmt = self::connect()->prepare(
-
-    'SELECT * FROM students WHERE id = ?'
-
-);
-
-$stmt->execute([$id]);
-
-// NOT this (vulnerable):
-
-// $db->query("SELECT * FROM students WHERE id = $id");
-
+// Even raw queries are parameterized
+DB::select('SELECT * FROM students WHERE id = ?', [$id]);
 ```
 
-**Automatic protection** against SQL injection attacks
+**No need to manually write prepared statements!**
+
+Laravel protects against SQL injection by default
 
 ---
 
-## Routing Logic
+## Routing
 
 ```php
+// routes/api.php
 
-// Pattern matching for ID-based routes
-
-if ($method === 'GET' && preg_match('#^/students/(\d+)$#', $path, $m)) {
-
-    $id = (int)$m[1];
-
-    $student = Database::getStudentById($id);
-
-    if ($student) Response::json($student);
-
-    Response::json(['error' => 'Student not found'], 404);
-
-}
-
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/students', [StudentController::class, 'index']);
+    Route::post('/students', [StudentController::class, 'store']);
+    Route::get('/students/{id}', [StudentController::class, 'show']);
+    Route::put('/students/{id}', [StudentController::class, 'update']);
+    Route::delete('/students/{id}', [StudentController::class, 'destroy']);
+});
 ```
 
-Uses regex to extract IDs from URLs, then queries database
+**Clean route definitions** - no regex pattern matching needed!
+
+Laravel automatically handles:
+- Parameter extraction
+- Type conversion
+- Route model binding
+- Middleware application
 
 ---
 
 ## Input Validation
 
 ```php
-
-$in = readJsonBody();
-
-$name = trim($in['name'] ?? '');
-
-$email = trim($in['email'] ?? '');
-
-if ($name === '' || $email === '') {
-
-    Response::json(['error' => 'name and email are required'], 422);
-
-}
-
+$data = $request->validate([
+    'name'  => 'required|string',
+    'email' => 'required|email|unique:students,email',
+    'student_id' => 'required|integer|exists:students,id',
+    'course_id'  => 'required|integer|exists:courses,id',
+]);
 ```
 
-All POST/PUT requests validate required fields before database operations
+**Built-in Validation Rules:**
+- `required` - Field must be present
+- `email` - Valid email format
+- `unique:table,column` - Must be unique
+- `exists:table,column` - Must exist in database
+- `integer` - Must be integer
+- `sometimes` - Only validate if present (for partial updates)
+
+**Automatic 422 responses** with detailed error messages
 
 ---
 
 ## CORS Support
 
+Configured in `config/cors.php`:
+
 ```php
-
-// Handle preflight requests
-
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-
-    Response::json(['ok' => true]);
-
-}
-
+'paths' => ['api/*', 'sanctum/csrf-cookie'],
+'allowed_methods' => ['*'],
+'allowed_origins' => ['*'],
+'allowed_headers' => ['*'],
 ```
+
+Laravel handles CORS automatically for all API routes
+
 ---
+
 ## Testing with Postman - Setup
 
 **Why Postman?**
+
 - Industry-standard API testing tool
-- Visual interface (no code needed initially)
+- Visual interface (no code needed)
 - Save and organize test collections
 - Easy authentication testing
 - Perfect for API development
+
 ---
+
 **Quick Setup:**
+
 1. Download Postman (free)
-2. Create "Student API" collection
+2. Create "Student API Laravel" collection
 3. Set environment variables:
-   - `base_url` = `http://localhost:8000`
-   - `token` = `super-secret-123`
+   - `base_url` = `http://localhost/api`
+   - `token` = (leave empty, will be set after login)
 
 ---
 
 ## Postman Test Example 1: Health Check
 
-**Testing GET /status**
+**Testing GET /api/status**
 
 **Request:**
 - Method: `GET`
-- URL: `http://localhost:8000/status`
+- URL: `http://localhost/api/status`
 - No headers needed
 
 **Response (200 OK):**
@@ -628,7 +593,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 {
   "ok": true,
   "php": "8.1.0",
-  "database": "MySQL"
+  "database": "MySQL (Laravel Eloquent)"
 }
 ```
 
@@ -636,14 +601,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 ---
 
-## Postman Test Example 2: Create Student
+## Postman Test Example 2: Login
 
-**Testing POST /students**
+**Testing POST /api/login**
 
 **Request:**
 - Method: `POST`
-- URL: `http://localhost:8000/students`
+- URL: `http://localhost/api/login`
 - Header: `Content-Type: application/json`
+- Body:
+```json
+{
+  "email": "user@example.com",
+  "password": "password"
+}
+```
+
+**Response (200 OK):**
+```json
+{
+  "token": "1|abcdef1234567890..."
+}
+```
+
+**Important:** Copy token and set it in Postman environment variable `{{token}}`
+
+✅ **Pass** - Authentication working
+
+---
+
+## Postman Test Example 3: Create Student
+
+**Testing POST /api/students**
+
+**Request:**
+- Method: `POST`
+- URL: `http://localhost/api/students`
+- Headers:
+  - `Content-Type: application/json`
+  - `Authorization: Bearer {{token}}`
 - Body:
 ```json
 {
@@ -651,13 +647,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
   "email": "john@example.com"
 }
 ```
+
 ---
+
 **Response (201 Created):**
 ```json
 {
   "id": 1,
   "name": "John Doe",
-  "email": "john@example.com"
+  "email": "john@example.com",
+  "created_at": "2025-12-04T10:30:00.000000Z",
+  "updated_at": "2025-12-04T10:30:00.000000Z"
 }
 ```
 
@@ -665,34 +665,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 ---
 
-## Postman Test Example 3: Authentication
+## Postman Test Example 4: Authentication
 
-**Testing DELETE /students/1 (Secured Endpoint)**
+**Testing GET /api/students (Secured Endpoint)**
 
 **Without Token:**
-- Method: `DELETE`
-- URL: `http://localhost:8000/students/1`
+- Method: `GET`
+- URL: `http://localhost/api/students`
 - No auth header
 
 **Response:** `401 Unauthorized` ❌
 
 **With Token:**
-- Header: `Authorization: Bearer super-secret-123`
----
-**Response:** `200 OK` ✅
-```json
-{
-  "deleted": true
-}
-```
+- Header: `Authorization: Bearer {{token}}`
+
+**Response:** `200 OK` with student array ✅
 
 **Security works!**
 
 ---
 
-## Postman Test Example 4: Validation
+## Postman Test Example 5: Validation
 
-**Testing POST /students with missing data**
+**Testing POST /api/students with invalid data**
 
 **Request:**
 - Method: `POST`
@@ -703,59 +698,76 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
   // Missing email!
 }
 ```
+
 ---
+
 **Response (422 Unprocessable Entity):**
 ```json
 {
-  "error": "name and email are required"
+  "message": "The email field is required.",
+  "errors": {
+    "email": ["The email field is required."]
+  }
 }
 ```
----
-✅ **Pass** - Validation working correctly
+
+✅ **Pass** - Laravel validation working correctly
 
 ---
 
-## Postman Test Example 5: Foreign Keys
+## Postman Test Example 6: Relationships
 
-**Testing POST /enrollments with invalid IDs**
+**Testing GET /api/enrollments**
 
 **Request:**
-- Method: `POST`
-- Auth: `Bearer super-secret-123`
-- Body:
-```json
-{
-  "student_id": 999,  // Doesn't exist
-  "course_id": 1
-}
-```
+- Method: `GET`
+- URL: `http://localhost/api/enrollments`
+- Header: `Authorization: Bearer {{token}}`
+
 ---
-**Response (422 Error):**
+
+**Response (200 OK):**
 ```json
-{
-  "error": "Student or course not found"
-}
+[
+  {
+    "id": 1,
+    "student_id": 1,
+    "course_id": 1,
+    "student": {
+      "id": 1,
+      "name": "John Doe",
+      "email": "john@example.com"
+    },
+    "course": {
+      "id": 1,
+      "code": "CSC640",
+      "title": "Software Engineering"
+    }
+  }
+]
 ```
 
-✅ **Pass** - Database validation working
+✅ **Pass** - Eloquent relationships loading automatically!
 
 ---
 
 ## Complete Test Coverage
 
-**All 11 Endpoints Tested:**
+**All 12 Endpoints Tested:**
 
 | Endpoint Type | Scenarios Tested | Status |
 |--------------|------------------|--------|
 | Health Check | API status | ✅ Pass |
+| Authentication | Login, Logout | ✅ Pass |
 | GET requests | Valid IDs, Invalid IDs (404) | ✅ Pass |
 | POST requests | Valid data, Missing data (422) | ✅ Pass |
 | PUT requests | Updates, Partial updates | ✅ Pass |
 | DELETE requests | With/without auth (401) | ✅ Pass |
 | Foreign Keys | Validation, Cascade deletes | ✅ Pass |
+| Relationships | Eager loading | ✅ Pass |
 | CORS | Preflight OPTIONS | ✅ Pass |
 
-**Total:** 16+ test scenarios - 100% pass rate
+**Total:** 20+ test scenarios - 100% pass rate
 
 ---
 
@@ -764,275 +776,239 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 **What we got from using Postman:**
 
 - ✅ Visual testing (no scripts needed)
-- ✅ All 11 endpoints validated
+- ✅ All 12 endpoints validated
 - ✅ Auth testing (401 errors caught)
 - ✅ Validation testing (422 errors work)
 - ✅ Saved collection (reusable tests)
 - ✅ Team collaboration ready
 
-**Professional tool usage** 
+**Professional tool usage**
 
 ---
 
 ## Test Results
 
 | Test | Expected | Status |
-
 |------|----------|--------|
-
-| GET /status | 200 OK | ✅ Pass |
-
-| GET /students | 200 OK | ✅ Pass |
-
-| GET /students/999 | 404 Not Found | ✅ Pass |
-
+| GET /api/status | 200 OK | ✅ Pass |
+| POST /api/login | 200 OK with token | ✅ Pass |
+| POST /api/login (invalid) | 401 Unauthorized | ✅ Pass |
+| GET /api/students (no auth) | 401 Unauthorized | ✅ Pass |
+| GET /api/students (with auth) | 200 OK | ✅ Pass |
 | POST with missing data | 422 Error | ✅ Pass |
-
 | DELETE without auth | 401 Unauthorized | ✅ Pass |
-
-| DELETE with token | 200 OK | ✅ Pass |
-
-| POST /enrollments invalid | 422 Error | ✅ Pass |
-
+| POST /api/enrollments invalid | 422 Error | ✅ Pass |
 | Foreign key validation | Works | ✅ Pass |
-
+| Relationships loading | Works | ✅ Pass |
 | CORS preflight | 200 OK | ✅ Pass |
 
-**100% pass rate - All 11 endpoints working**
+**100% pass rate - All 12 endpoints working**
 
 ---
 
 ## HTTP Status Codes
 
 | Code | Meaning |
-
 |------|---------|
-
 | 200 | OK - Success |
-
 | 201 | Created - Resource created |
-
 | 401 | Unauthorized - Missing/invalid token |
-
 | 404 | Not Found - Resource doesn't exist |
-
 | 422 | Unprocessable Entity - Invalid data |
-
 | 500 | Server Error - Database issue |
 
 ---
 
 ## Key Features
 
-- ✅ MySQL database integration
-
-- ✅ PDO prepared statements (SQL injection safe)
-
+- ✅ Laravel 10 framework
+- ✅ Eloquent ORM (no raw SQL)
+- ✅ Laravel Sanctum authentication
+- ✅ Database migrations
 - ✅ Foreign key relationships
-
 - ✅ Cascade deletes
-
-- ✅ Bearer token authentication
-
-- ✅ Input validation
-
+- ✅ Built-in validation
 - ✅ CORS support
-
 - ✅ RESTful architecture
-
 - ✅ Comprehensive error handling
+- ✅ Docker/Sail deployment
 
 ---
 
 ## Challenges
 
-**1. Database Connection Management**
+**1. Understanding Laravel Sanctum**
 
-- Problem: Creating new connection each request
+- Problem: How tokens work vs hardcoded Bearer token
+- Solution: Read docs, realized tokens are user-based and stored in DB
 
-- Solution: Singleton pattern in Database.php
+**2. All Endpoints Requiring Auth**
 
-**2. Foreign Key Validation**
+- Problem: Initially all endpoints needed auth (harder testing)
+- Solution: Kept it - it's more secure! Only health check and login are public
 
-- Problem: Need to verify student/course exist
+**3. Eloquent Relationships**
 
-- Solution: Check before creating enrollment
-
-**3. CORS Errors**
-
-- Problem: Browser blocking requests
-
-- Solution: Added OPTIONS handling
----
-
-**4. Error Handling**
-
-- Problem: Raw PDO exceptions not user-friendly
-
-- Solution: Wrapped in try-catch with clear messages
-
-Database schema design was the hardest part initially
+- Problem: Understanding relationship types
+- Solution: Learned hasMany, belongsTo, belongsToMany patterns
 
 ---
 
-## Part 1 vs Part 2
+**4. Validation Rules**
 
-| Feature | Part 1 | Part 2 |
+- Problem: Learning all Laravel validation rules
+- Solution: Laravel docs are excellent - `required`, `email`, `unique`, `exists`, `sometimes`
 
-|---------|--------|--------|
+**5. Docker/Sail Setup**
 
-| Data Storage | Mock.php (in-memory) | MySQL Database |
+- Problem: Initial confusion with Docker on WSL
+- Solution: Laravel Sail makes it easy - `./vendor/bin/sail up` and done!
 
-| Endpoints | 10 | 11 (+ health check) |
+**6. Migration from PDO to Eloquent**
 
-| Secure Endpoints | 4 | 5 |
-
-| Data Persistence | ❌ No | ✅ Yes |
-
-| Foreign Keys | ❌ No | ✅ Yes |
-
-| SQL Injection Protection | N/A | ✅ PDO Prepared |
-
-| Production Ready | ⚠️ No | ✅ Closer |
+- Problem: Rewriting all PDO queries
+- Solution: Eloquent is simpler - `Student::all()` vs `SELECT * FROM students`
 
 ---
 
-## Future Enhancements
+## Vanilla PHP vs Laravel
+
+| Feature | Vanilla PHP | Laravel |
+|---------|-------------|---------|
+| Routing | Manual regex | Clean routes |
+| Database | Raw PDO | Eloquent ORM |
+| Validation | Manual checks | Built-in system |
+| Authentication | Hardcoded token | Laravel Sanctum |
+| Error Handling | Manual responses | Automatic |
+| Code Lines | ~500+ | ~200 (same features) |
+| Testing | Manual only | PHPUnit included |
+| Deployment | Manual setup | Docker/Sail |
+
+**Verdict:** Laravel is way more productive!
 
 ---
 
-## Work in Progress: Laravel ORM Migration
+## Migration Benefits
 
-**Target Completion: November 26**
+**What we gained:**
 
-Currently refactoring to Laravel + Eloquent:
+- ✅ Cleaner code (60% reduction)
+- ✅ Better security (Sanctum vs hardcoded)
+- ✅ Built-in validation
+- ✅ Automatic error handling
+- ✅ Database migrations (version controlled)
+- ✅ Eloquent relationships (no manual JOINs)
+- ✅ Docker deployment
+- ✅ Industry-standard framework
+- ✅ Better testing support
+- ✅ More maintainable codebase
 
-- Moving to Laravel's routing structure
-- Replacing PDO with Eloquent models
-- Using Laravel's middleware & validation
-- `.env` configuration management
-
-**Why Laravel?**
-- Industry standard framework
-- Cleaner code (60% reduction)
-- Better testing support
-- Modern PHP practices
+**Much better than vanilla PHP!**
 
 ---
 
 ## Laravel Migration Example
 
-**Before (Current PDO):**
+**Before (Vanilla PHP PDO):**
+
 ```php
 public static function getAllStudents(): array {
     $stmt = self::connect()->query('SELECT * FROM students');
     return $stmt->fetchAll();
 }
-```
 
-**After (Laravel Eloquent):**
-```php
-public static function getAllStudents(): array {
-    return Student::all()->toArray();
+public static function createStudent(string $name, string $email): array {
+    $stmt = self::connect()->prepare(
+        'INSERT INTO students (name, email) VALUES (?, ?)'
+    );
+    $stmt->execute([$name, $email]);
+    $id = (int)self::connect()->lastInsertId();
+    return ['id' => $id, 'name' => $name, 'email' => $email];
 }
 ```
 
-**Much cleaner!** Relationships, validation, and security built-in.
+---
+
+**After (Laravel Eloquent):**
+
+```php
+public function index() {
+    return response()->json(Student::all());
+}
+
+public function store(Request $request) {
+    $data = $request->validate([
+        'name'  => 'required|string',
+        'email' => 'required|email|unique:students,email',
+    ]);
+    $student = Student::create($data);
+    return response()->json($student, 201);
+}
+```
+
+**Much cleaner!** Validation, error handling, and JSON conversion automatic
 
 ---
 
 ## What I Learned
 
-- How REST APIs work in practice
+- How Laravel framework works
+- Eloquent ORM and relationships
+- Laravel Sanctum authentication
+- Database migrations
+- Laravel validation system
+- Docker and Laravel Sail
+- MVC architecture
+- Middleware and routing
+- Modern PHP best practices
+- How much boilerplate Laravel eliminates
 
-- HTTP methods and status codes
-
-- Bearer token authentication
-
-- PHP namespaces and Composer
-
-- **PDO and prepared statements**
-
-- **Database schema design**
-
-- **Foreign key relationships**
-
-- NGINX configuration
-
-- JSON data handling
-
-- Security best practices
-
-- **Postman testing**
-
-- **Database connection management**
-
-Database integration was satisfying!
+Laravel makes PHP development enjoyable!
 
 ---
 
 ## Project Timeline
 
 | Milestone | Planned | Actual | Status |
-
 |-----------|---------|--------|--------|
-
-| Environment Setup | Nov 1 | Nov 1 | ✅ Done |
-
-| Database Schema | Nov 2 | Nov 2 | ✅ Done |
-
-| Database Integration | Nov 3 | Nov 4 | ✅ Done |
-
-| API Implementation | Nov 4 | Nov 5 | ✅ Done |
-
-| Security | Nov 5 | Nov 5 | ✅ Done |
-
-| Testing (Postman) | Nov 6 | Nov 6 | ✅ Done |
-
-| Documentation | Nov 6 | Nov 6 | ✅ Done |
-
-| Laravel ORM migration | Nov 6 | In Progress | Target: Nov 26
-
-| **Submission** | **Nov 26** | - | 🟡 In Progress |
+| Laravel Installation | Nov 26 | Nov 26 | ✅ Done |
+| Database Migrations | Nov 27 | Nov 27 | ✅ Done |
+| Model Creation | Nov 27 | Nov 27 | ✅ Done |
+| Controller Implementation | Nov 28 | Nov 28 | ✅ Done |
+| Authentication Setup | Nov 29 | Nov 29 | ✅ Done |
+| Route Configuration | Nov 29 | Nov 29 | ✅ Done |
+| Testing (Postman) | Nov 30 | Nov 30 | ✅ Done |
+| Docker/Sail Setup | Dec 1 | Dec 1 | ✅ Done |
+| Documentation | Dec 2 | Dec 2 | ✅ Done |
+| **Migration Complete** | **Dec 3** | **Dec 3** | ✅ **Done** |
 
 ---
 
 ## Tech Stack Summary
 
-- Web Server: NGINX / PHP Built-in
-
-- Backend: PHP 8+
-
-- Database: MySQL 5.7+ with PDO
-
-- Architecture: RESTful API
-
-- Auth: Bearer Token
-
+- Framework: Laravel 10
+- Web Server: Laravel Sail (Docker)
+- Backend: PHP 8.1+
+- Database: MySQL 8.4 with Eloquent ORM
+- Architecture: RESTful API (MVC)
+- Auth: Laravel Sanctum
 - Format: JSON
-
 - Testing: Postman
-
 - VCS: Git/GitHub
 
 ---
 
 ## Deliverables
 
-- ✅ 11 REST API endpoints implemented
-
-- ✅ 5 secure endpoints with Bearer tokens
-
-- ✅ MySQL database with proper schema
-
+- ✅ 12 REST API endpoints implemented
+- ✅ 11 secure endpoints with Laravel Sanctum
+- ✅ MySQL database with Laravel migrations
+- ✅ Eloquent ORM with relationships
 - ✅ Foreign key relationships
-
-- ✅ PDO prepared statements
-
+- ✅ Built-in validation system
 - ✅ Comprehensive Postman testing
-
 - ✅ Complete documentation (README + Report)
-
+- ✅ Docker/Sail deployment setup
 - ✅ All endpoints tested and validated
 
 ---
@@ -1040,20 +1016,16 @@ Database integration was satisfying!
 ## Summary
 
 - ✅ Fully functional REST API
-
-- ✅ 11 endpoints (5 secured)
-
-- ✅ MySQL database integration
-
+- ✅ 12 endpoints (11 secured)
+- ✅ Laravel 10 framework
+- ✅ Eloquent ORM integration
 - ✅ Clean, maintainable code
-
-- ✅ Good error handling
-
+- ✅ Excellent error handling
 - ✅ Comprehensive documentation
-
 - ✅ Thoroughly tested with Postman
+- ✅ Docker deployment ready
 
-**Production-ready foundation!**
+**Production-ready Laravel API!**
 
 ---
 
@@ -1062,36 +1034,48 @@ Database integration was satisfying!
 **What we gained:**
 
 - ✅ Data persistence (survives server restarts)
-
 - ✅ Referential integrity (foreign keys)
-
 - ✅ Cascade deletes (automatic cleanup)
-
-- ✅ SQL injection protection (PDO)
-
+- ✅ SQL injection protection (automatic)
 - ✅ Scalability (can handle more data)
-
+- ✅ Version-controlled schema (migrations)
+- ✅ Eloquent relationships (no manual JOINs)
 - ✅ Production-ready architecture
 
-Much better than in-memory mock data!
+Much better than in-memory mock data or raw PDO!
 
 ---
 
 ## API Reference
 
-**Base URL:** `http://localhost:8000`
+**Base URL:** `http://localhost/api`
 
-- Health: `/status`
+- Health: `/api/status`
+- Auth: `/api/login`, `/api/logout`
+- Students: `/api/students`, `/api/students/{id}`
+- Courses: `/api/courses`, `/api/courses/{id}` 
+- Enrollments: `/api/enrollments`, `/api/enrollments/{id}`
 
-- Students: `/students`, `/students/{id}`
-
-- Courses: `/courses`, `/courses/{id}` 
-
-- Enrollments: `/enrollments`, `/enrollments/{id}`
-
-**Auth header:** `Authorization: Bearer super-secret-123`
+**Auth:** POST `/api/login` to get token, then include:
+```
+Authorization: Bearer {token}
+```
 
 **All responses:** JSON format
+
+---
+
+## Future Enhancements
+
+- Pagination for large result sets
+- Filtering and search capabilities
+- Rate limiting
+- Refresh tokens
+- Role-based access control (RBAC)
+- Unit and integration tests
+- API documentation (Swagger/OpenAPI)
+- Performance optimization
+- Caching with Redis
 
 ---
 
@@ -1099,7 +1083,7 @@ Much better than in-memory mock data!
 
 **Kevin Deras**  
 
-**CSC 640 - HW4 Part 2**
+**CSC 640 - Laravel Migration**
 
 Questions?
 
